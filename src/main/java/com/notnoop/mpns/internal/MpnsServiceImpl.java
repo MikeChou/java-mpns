@@ -32,6 +32,7 @@ package com.notnoop.mpns.internal;
 
 import java.io.IOException;
 
+import com.notnoop.mpns.MpnsResponse;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
@@ -58,6 +59,21 @@ public class MpnsServiceImpl extends AbstractMpnsService implements MpnsService 
             HttpResponse response = httpClient.execute(request);
             Utilities.fireDelegate(message, response, delegate);
             EntityUtils.consume(response.getEntity());
+        } catch (ClientProtocolException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new NetworkIOException(e);
+        }
+    }
+
+    public MpnsResponse pushWithReturnValue(String subscriptionUri, MpnsNotification message)
+            throws NetworkIOException {
+        HttpPost request = postMessage(subscriptionUri, message.getRequestBody(),
+                message.getHttpHeaders());
+        try {
+            HttpResponse response = httpClient.execute(request);
+            EntityUtils.consume(response.getEntity());
+            return Utilities.logicalResponseFor(response);
         } catch (ClientProtocolException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
