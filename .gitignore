@@ -12,3 +12,5 @@ release.properties
 .classpath
 .settings
 tags
+.idea/
+*.iml
